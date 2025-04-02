@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item name="recyclerView" type="id" />
+    <item name="btnSaveExpense" type="id" />
+    <item name="etDate" type="id" />
+    <item name="etNotes" type="id" />
+    <item name="etCustomPaymentMethod" type="id" />
+    <item name="spinnerPaymentMethod" type="id" />
+    <item name="etCustomCategory" type="id" />
+    <item name="spinnerCategory" type="id" />
+    <item name="etPrice" type="id" />
+    <item name="etTitle" type="id" />
+    <item name="spinnerCurrency" type="id" />
+    <item name="etCategory" type="id" />
+    <item name="etPaymentMethod" type="id" />
+    <item name="tvCategoryLabel" type="id" />
+    <item name="tvPaymentMethodLabel" type="id" />
+    <item name="tvPriceLabel" type="id" />
+    <item name="btnAddExpense" type="id" />
+    <item name="categoriesLayout" type="id" />
+    <item name="btnExpense" type="id" />
+    <item name="btnOptions" type="id" />
+    <item name="btnTransport" type="id" />
+    <item name="btnFood" type="id" />
+    <item name="btnPurchases" type="id" />
+    <item name="btnEntertainment" type="id" />
+    <item name="btnEatOutside" type="id" />
+    <item name="btnOther" type="id" />
+    <item name="btnIncome" type="id" />
+    <item name="btn_login" type="id" />
+    <item name="registerNow" type="id" />
+    <item name="categoryText" type="id" />
+    <item name="amountText" type="id" />
+    <item name="dateText" type="id" />
+    <item name="noteText" type="id" />
+</resources>

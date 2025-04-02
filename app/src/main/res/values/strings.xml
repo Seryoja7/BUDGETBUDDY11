@@ -1,0 +1,34 @@
+<resources>
+    <string name="app_name">BudgetBuddy</string>
+    <string name="login">Login</string>
+    <string name="email">Email</string>
+    <string name="password">Password</string>
+    <string name="login1">LOGIN</string>
+    <string name="register">Register</string>
+    <string name="register1">REGISTER</string>
+    <string name="click_to_login">Click to login</string>
+    <string name="click_to_register">Click to register</string>
+    <string name="logout">LOGOUT</string>
+    <string name="expense_title_description">Expense Title/Description</string>
+    <string name="price">Price</string>
+    <string name="enter_custom_category">Enter custom category</string>
+    <string name="enter_custom_payment_method">Enter custom payment method</string>
+    <string name="notes">Notes</string>
+    <string name="date">Date</string>
+    <string name="save_expense">Save Expense</string>
+    <string name="back">Back</string>
+    <string name="options">Options</string>
+    <string name="view_expenses">View Expenses</string>
+    <string name="add_expense">Add Expense</string>
+    <string name="other">Other</string>
+    <string name="todo">TODO</string>
+    <string name="eat_outside">Eat Outside</string>
+    <string name="entertainment">Entertainment</string>
+    <string name="transport">Transport</string>
+    <string name="food">Food</string>
+    <string name="purchases">Purchases</string>
+    <string name="amount">Amount</string>
+    <string name="note">Note</string>
+    <string name="view_activity">View Activity</string>
+    <string name="view_income">View Income</string>
+</resources>
