@@ -1,4 +1,5 @@
 package com.example.budgetbuddy;
+
 import android.app.AlertDialog;
 import android.content.Intent;
 import android.graphics.Point;
@@ -82,14 +83,23 @@ public class MainActivity extends AppCompatActivity {
                             categorySums.put(category, categorySums.get(category) + amount);
                         }
 
-                        tvTransportSum.setText(String.format(Locale.getDefault(), "%.2f AMD", categorySums.get("Transport")));
-                        tvFoodSum.setText(String.format(Locale.getDefault(), "%.2f AMD", categorySums.get("Food")));
-                        tvPurchasesSum.setText(String.format(Locale.getDefault(), "%.2f AMD", categorySums.get("Purchases")));
-                        tvEntertainmentSum.setText(String.format(Locale.getDefault(), "%.2f AMD", categorySums.get("Entertainment")));
-                        tvEatOutsideSum.setText(String.format(Locale.getDefault(), "%.2f AMD", categorySums.get("Eat Outside")));
-                        tvOtherSum.setText(String.format(Locale.getDefault(), "%.2f AMD", categorySums.get("Other")));
+                        updateSumView(tvTransportSum, categorySums.get("Transport"));
+                        updateSumView(tvFoodSum, categorySums.get("Food"));
+                        updateSumView(tvPurchasesSum, categorySums.get("Purchases"));
+                        updateSumView(tvEntertainmentSum, categorySums.get("Entertainment"));
+                        updateSumView(tvEatOutsideSum, categorySums.get("Eat Outside"));
+                        updateSumView(tvOtherSum, categorySums.get("Other"));
                     }
                 });
+    }
+
+    private void updateSumView(TextView textView, double amount) {
+        if (amount > 0) {
+            textView.setText(String.format(Locale.getDefault(), "%.2f AMD", amount));
+            textView.setVisibility(View.VISIBLE);
+        } else {
+            textView.setVisibility(View.GONE);
+        }
     }
 
     @Override
