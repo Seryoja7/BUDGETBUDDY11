@@ -55,6 +55,15 @@
                 android:padding="20dp"
                 app:tint="@android:color/white"
                 android:contentDescription="Transport" />
+
+            <TextView
+                android:id="@+id/tvTransportSum"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="0.00 AMD"
+                android:textSize="14sp"
+                android:textColor="@android:color/black"
+                android:layout_marginTop="4dp" />
         </LinearLayout>
 
         <LinearLayout
@@ -82,6 +91,15 @@
                 android:padding="20dp"
                 app:tint="@android:color/white"
                 android:contentDescription="Food" />
+
+            <TextView
+                android:id="@+id/tvFoodSum"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="0.00 AMD"
+                android:textSize="14sp"
+                android:textColor="@android:color/black"
+                android:layout_marginTop="4dp" />
         </LinearLayout>
 
         <LinearLayout
@@ -109,6 +127,15 @@
                 android:padding="20dp"
                 app:tint="@android:color/white"
                 android:contentDescription="Purchases" />
+
+            <TextView
+                android:id="@+id/tvPurchasesSum"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="0.00 AMD"
+                android:textSize="14sp"
+                android:textColor="@android:color/black"
+                android:layout_marginTop="4dp" />
         </LinearLayout>
 
         <LinearLayout
@@ -136,6 +163,15 @@
                 android:padding="20dp"
                 app:tint="@android:color/white"
                 android:contentDescription="Entertainment" />
+
+            <TextView
+                android:id="@+id/tvEntertainmentSum"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="0.00 AMD"
+                android:textSize="14sp"
+                android:textColor="@android:color/black"
+                android:layout_marginTop="4dp" />
         </LinearLayout>
     </LinearLayout>
 
@@ -174,6 +210,15 @@
                 android:padding="20dp"
                 app:tint="@android:color/white"
                 android:contentDescription="Eat Outside" />
+
+            <TextView
+                android:id="@+id/tvEatOutsideSum"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="0.00 AMD"
+                android:textSize="14sp"
+                android:textColor="@android:color/black"
+                android:layout_marginTop="4dp" />
         </LinearLayout>
 
         <LinearLayout
@@ -201,6 +246,15 @@
                 android:padding="20dp"
                 app:tint="@android:color/white"
                 android:contentDescription="Other" />
+
+            <TextView
+                android:id="@+id/tvOtherSum"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="0.00 AMD"
+                android:textSize="14sp"
+                android:textColor="@android:color/black"
+                android:layout_marginTop="4dp" />
         </LinearLayout>
     </LinearLayout>
 

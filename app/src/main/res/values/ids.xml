@@ -33,4 +33,10 @@
     <item name="amountText" type="id" />
     <item name="dateText" type="id" />
     <item name="noteText" type="id" />
+    <item name="tvTransportSum" type="id" />
+    <item name="tvFoodSum" type="id" />
+    <item name="tvPurchasesSum" type="id" />
+    <item name="tvEntertainmentSum" type="id" />
+    <item name="tvEatOutsideSum" type="id" />
+    <item name="tvOtherSum" type="id" />
 </resources>

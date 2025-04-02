@@ -1,5 +1,4 @@
 package com.example.budgetbuddy;
-
 import android.app.AlertDialog;
 import android.content.Intent;
 import android.graphics.Point;
@@ -15,12 +14,14 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import com.google.firebase.Timestamp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
@@ -31,6 +32,7 @@ public class MainActivity extends AppCompatActivity {
     private ImageButton btnExpense, btnIncome;
     private ImageButton btnTransport, btnFood, btnPurchases, btnEntertainment, btnEatOutside, btnOther;
     private ImageButton btnOptions;
+    private TextView tvTransportSum, tvFoodSum, tvPurchasesSum, tvEntertainmentSum, tvEatOutsideSum, tvOtherSum;
     private float initialXExpense, initialYExpense, initialXIncome, initialYIncome;
     private static final float SNAP_THRESHOLD = 200f;
     private FirebaseFirestore db;
@@ -47,8 +49,47 @@ public class MainActivity extends AppCompatActivity {
         initializeViews();
         setupButtonPositions();
         setTouchListeners();
+        loadCategorySums();
 
         btnOptions.setOnClickListener(v -> showOptionsDialog());
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        loadCategorySums();
+    }
+
+    private void loadCategorySums() {
+        String userId = mAuth.getCurrentUser().getUid();
+        db.collection("transactions")
+                .whereEqualTo("userId", userId)
+                .whereEqualTo("type", "Expense")
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        Map<String, Double> categorySums = new HashMap<>();
+                        categorySums.put("Transport", 0.0);
+                        categorySums.put("Food", 0.0);
+                        categorySums.put("Purchases", 0.0);
+                        categorySums.put("Entertainment", 0.0);
+                        categorySums.put("Eat Outside", 0.0);
+                        categorySums.put("Other", 0.0);
+
+                        for (QueryDocumentSnapshot document : task.getResult()) {
+                            String category = document.getString("category");
+                            double amount = document.getDouble("amount");
+                            categorySums.put(category, categorySums.get(category) + amount);
+                        }
+
+                        tvTransportSum.setText(String.format(Locale.getDefault(), "%.2f AMD", categorySums.get("Transport")));
+                        tvFoodSum.setText(String.format(Locale.getDefault(), "%.2f AMD", categorySums.get("Food")));
+                        tvPurchasesSum.setText(String.format(Locale.getDefault(), "%.2f AMD", categorySums.get("Purchases")));
+                        tvEntertainmentSum.setText(String.format(Locale.getDefault(), "%.2f AMD", categorySums.get("Entertainment")));
+                        tvEatOutsideSum.setText(String.format(Locale.getDefault(), "%.2f AMD", categorySums.get("Eat Outside")));
+                        tvOtherSum.setText(String.format(Locale.getDefault(), "%.2f AMD", categorySums.get("Other")));
+                    }
+                });
     }
 
     @Override
@@ -86,6 +127,12 @@ public class MainActivity extends AppCompatActivity {
         btnEatOutside = findViewById(R.id.btnEatOutside);
         btnOther = findViewById(R.id.btnOther);
         btnOptions = findViewById(R.id.btnOptions);
+        tvTransportSum = findViewById(R.id.tvTransportSum);
+        tvFoodSum = findViewById(R.id.tvFoodSum);
+        tvPurchasesSum = findViewById(R.id.tvPurchasesSum);
+        tvEntertainmentSum = findViewById(R.id.tvEntertainmentSum);
+        tvEatOutsideSum = findViewById(R.id.tvEatOutsideSum);
+        tvOtherSum = findViewById(R.id.tvOtherSum);
     }
 
     private void setupButtonPositions() {
@@ -224,6 +271,7 @@ public class MainActivity extends AppCompatActivity {
                 .add(transaction)
                 .addOnSuccessListener(documentReference -> {
                     Toast.makeText(this, type + " saved!", Toast.LENGTH_SHORT).show();
+                    loadCategorySums();
                 })
                 .addOnFailureListener(e -> {
                     Toast.makeText(this, "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
