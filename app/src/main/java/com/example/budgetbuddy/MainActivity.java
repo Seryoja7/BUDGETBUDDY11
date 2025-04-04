@@ -15,6 +15,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
@@ -38,6 +39,8 @@ public class MainActivity extends AppCompatActivity {
     private static final float SNAP_THRESHOLD = 200f;
     private FirebaseFirestore db;
     private FirebaseAuth mAuth;
+    private TextView tvTotalIncome, tvTotalExpense, tvBudget;
+    private LinearLayout summaryLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,7 +54,7 @@ public class MainActivity extends AppCompatActivity {
         setupButtonPositions();
         setTouchListeners();
         loadCategorySums();
-
+        addSummaryLayout(); // Add the Income, Expense, and Budget summaries
         btnOptions.setOnClickListener(v -> showOptionsDialog());
     }
 
@@ -59,6 +62,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         loadCategorySums();
+        updateSummaryViews(); // Update the summary views when the activity resumes
     }
 
     private void loadCategorySums() {
@@ -76,13 +80,11 @@ public class MainActivity extends AppCompatActivity {
                         categorySums.put("Entertainment", 0.0);
                         categorySums.put("Eat Outside", 0.0);
                         categorySums.put("Other", 0.0);
-
                         for (QueryDocumentSnapshot document : task.getResult()) {
                             String category = document.getString("category");
                             double amount = document.getDouble("amount");
                             categorySums.put(category, categorySums.get(category) + amount);
                         }
-
                         updateSumView(tvTransportSum, categorySums.get("Transport"));
                         updateSumView(tvFoodSum, categorySums.get("Food"));
                         updateSumView(tvPurchasesSum, categorySums.get("Purchases"));
@@ -246,7 +248,6 @@ public class MainActivity extends AppCompatActivity {
         EditText etAmount = dialogView.findViewById(R.id.etAmount);
         EditText etNote = dialogView.findViewById(R.id.etNote);
         setupNumberPad(dialogView, etAmount);
-
         builder.setView(dialogView)
                 .setTitle("Add " + (isExpense ? "Expense" : "Income") + " to " + category.getContentDescription())
                 .setPositiveButton("Save", (dialog, which) -> {
@@ -265,7 +266,6 @@ public class MainActivity extends AppCompatActivity {
     private void saveToFirestore(String category, String amount, String note, boolean isExpense) {
         String type = isExpense ? "Expense" : "Income";
         String currentDate = new SimpleDateFormat("dd-MM-yyyy", Locale.getDefault()).format(new Date());
-
         Map<String, Object> transaction = new HashMap<>();
         transaction.put("type", type);
         transaction.put("title", category);
@@ -276,7 +276,6 @@ public class MainActivity extends AppCompatActivity {
         transaction.put("timestamp", Timestamp.now());
         transaction.put("userId", mAuth.getCurrentUser().getUid());
         transaction.put("currency", "AMD");
-
         db.collection("transactions")
                 .add(transaction)
                 .addOnSuccessListener(documentReference -> {
@@ -322,21 +321,18 @@ public class MainActivity extends AppCompatActivity {
                 LinearLayout.LayoutParams.WRAP_CONTENT
         );
         params.setMargins(16, 8, 16, 8);
-
         Button btnViewExpense = new Button(this);
         btnViewExpense.setText("View Expenses");
         btnViewExpense.setOnClickListener(v -> {
             startViewActivity("Expense");
             ((AlertDialog) ((View) v.getParent()).getTag()).dismiss();
         });
-
         Button btnViewIncome = new Button(this);
         btnViewIncome.setText("View Incomes");
         btnViewIncome.setOnClickListener(v -> {
             startViewActivity("Income");
             ((AlertDialog) ((View) v.getParent()).getTag()).dismiss();
         });
-
         Button btnLogout = new Button(this);
         btnLogout.setText("Logout");
         btnLogout.setOnClickListener(v -> {
@@ -344,14 +340,11 @@ public class MainActivity extends AppCompatActivity {
             startActivity(new Intent(MainActivity.this, Login.class));
             finishAffinity();
         });
-
         layout.addView(btnViewExpense, params);
         layout.addView(btnViewIncome, params);
         layout.addView(btnLogout, params);
-
         builder.setView(layout);
         AlertDialog dialog = builder.create();
-
         if (dialog.getWindow() != null) {
             dialog.getWindow().setGravity(Gravity.TOP | Gravity.START);
             WindowManager.LayoutParams layoutParams = dialog.getWindow().getAttributes();
@@ -359,8 +352,113 @@ public class MainActivity extends AppCompatActivity {
             layoutParams.y = 120;
             dialog.getWindow().setAttributes(layoutParams);
         }
-
         layout.setTag(dialog);
         dialog.show();
+    }
+
+    private void addSummaryLayout() {
+        RelativeLayout rootLayout = findViewById(android.R.id.content).getRootView().findViewById(R.id.rootLayout);
+
+        // Create a horizontal LinearLayout for the summary
+        summaryLayout = new LinearLayout(this);
+        summaryLayout.setId(View.generateViewId());
+        summaryLayout.setOrientation(LinearLayout.HORIZONTAL);
+        summaryLayout.setGravity(Gravity.CENTER_VERTICAL);
+        RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(
+                RelativeLayout.LayoutParams.WRAP_CONTENT,
+                RelativeLayout.LayoutParams.WRAP_CONTENT
+        );
+        layoutParams.addRule(RelativeLayout.ALIGN_PARENT_TOP);
+        layoutParams.addRule(RelativeLayout.ALIGN_PARENT_END);
+        layoutParams.setMargins(0, 16, 16, 0); // Adjust margins as needed
+        summaryLayout.setLayoutParams(layoutParams);
+
+        // Add Income section
+        LinearLayout incomeLayout = createSummarySection("Income", "0.00 AMD");
+        summaryLayout.addView(incomeLayout);
+
+        // Add Expense section
+        LinearLayout expenseLayout = createSummarySection("Expense", "0.00 AMD");
+        summaryLayout.addView(expenseLayout);
+
+        // Add Budget section
+        LinearLayout budgetLayout = createSummarySection("Budget", "0.00 AMD");
+        summaryLayout.addView(budgetLayout);
+
+        // Add the summary layout to the root layout
+        rootLayout.addView(summaryLayout);
+    }
+
+    private LinearLayout createSummarySection(String label, String value) {
+        LinearLayout verticalLayout = new LinearLayout(this);
+        verticalLayout.setOrientation(LinearLayout.VERTICAL);
+        verticalLayout.setGravity(Gravity.CENTER_HORIZONTAL);
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+        );
+        params.setMargins(16, 0, 16, 0); // Spacing between sections
+        verticalLayout.setLayoutParams(params);
+
+        TextView labelView = new TextView(this);
+        labelView.setText(label);
+        labelView.setTextColor(getResources().getColor(android.R.color.black));
+        labelView.setTextSize(14);
+        verticalLayout.addView(labelView);
+
+        TextView valueView = new TextView(this);
+        valueView.setText(value);
+        valueView.setTextColor(getResources().getColor(android.R.color.black));
+        valueView.setTextSize(14);
+        verticalLayout.addView(valueView);
+
+        if (label.equals("Income")) {
+            tvTotalIncome = valueView;
+        } else if (label.equals("Expense")) {
+            tvTotalExpense = valueView;
+        } else if (label.equals("Budget")) {
+            tvBudget = valueView;
+        }
+
+        return verticalLayout;
+    }
+
+    private void updateSummaryViews() {
+        String userId = mAuth.getCurrentUser().getUid();
+
+        // Calculate Total Income
+        db.collection("transactions")
+                .whereEqualTo("userId", userId)
+                .whereEqualTo("type", "Income")
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        double totalIncome = 0.0;
+                        for (QueryDocumentSnapshot document : task.getResult()) {
+                            totalIncome += document.getDouble("amount");
+                        }
+                        tvTotalIncome.setText(String.format(Locale.getDefault(), "%.2f AMD", totalIncome));
+
+                        // Calculate Total Expense
+                        double finalTotalIncome = totalIncome;
+                        db.collection("transactions")
+                                .whereEqualTo("userId", userId)
+                                .whereEqualTo("type", "Expense")
+                                .get()
+                                .addOnCompleteListener(task2 -> {
+                                    if (task2.isSuccessful()) {
+                                        double totalExpense = 0.0;
+                                        for (QueryDocumentSnapshot document : task2.getResult()) {
+                                            totalExpense += document.getDouble("amount");
+                                        }
+                                        tvTotalExpense.setText(String.format(Locale.getDefault(), "%.2f AMD", totalExpense));
+
+                                        // Calculate Budget
+                                        double budget = finalTotalIncome - totalExpense;
+                                        tvBudget.setText(String.format(Locale.getDefault(), "%.2f AMD", budget));
+                                    }
+                                });
+                    }
+                });
     }
 }

@@ -39,4 +39,9 @@
     <item name="tvEntertainmentSum" type="id" />
     <item name="tvEatOutsideSum" type="id" />
     <item name="tvOtherSum" type="id" />
+    <item name="yellowButtonsLayout" type="id" />
+    <item name="tvIncomeSum" type="id" />
+    <item name="tvExpenseSum" type="id" />
+    <item name="tvBudgetSum" type="id" />
+    <item name="rootLayout" type="id" />
 </resources>
