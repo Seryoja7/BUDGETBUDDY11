@@ -11,7 +11,7 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ActivityHistory extends AppCompatActivity {
+public class ActivityHistory extends AppCompatActivity implements TransactionAdapter.OnTransactionDeleteListener {
     private RecyclerView recyclerView;
     private TransactionAdapter adapter;
     private List<Transaction> transactions;
@@ -27,7 +27,7 @@ public class ActivityHistory extends AppCompatActivity {
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
         transactions = new ArrayList<>();
-        adapter = new TransactionAdapter(transactions);
+        adapter = new TransactionAdapter(transactions, this);
         recyclerView.setAdapter(adapter);
 
         mAuth = FirebaseAuth.getInstance();
@@ -38,7 +38,7 @@ public class ActivityHistory extends AppCompatActivity {
 
     private void loadExpenses() {
         db.collection("transactions")
-                .whereEqualTo("userId", mAuth.getCurrentUser().getUid()) // Filter by user
+                .whereEqualTo("userId", mAuth.getCurrentUser().getUid())
                 .whereEqualTo("type", "Expense")
                 .get()
                 .addOnCompleteListener(task -> {
@@ -46,13 +46,28 @@ public class ActivityHistory extends AppCompatActivity {
                         transactions.clear();
                         for (QueryDocumentSnapshot document : task.getResult()) {
                             Transaction transaction = document.toObject(Transaction.class);
-                            transaction.setId(document.getId()); // Set Firestore document ID
+                            transaction.setId(document.getId());
                             transactions.add(transaction);
                         }
                         adapter.notifyDataSetChanged();
                     } else {
                         Toast.makeText(this, "Failed to load expenses", Toast.LENGTH_SHORT).show();
                     }
+                });
+    }
+
+    @Override
+    public void onDelete(int position) {
+        String docId = transactions.get(position).getId();
+        db.collection("transactions").document(docId)
+                .delete()
+                .addOnSuccessListener(aVoid -> {
+                    transactions.remove(position);
+                    adapter.notifyItemRemoved(position);
+                    Toast.makeText(this, "Expense deleted", Toast.LENGTH_SHORT).show();
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(this, "Failed to delete expense", Toast.LENGTH_SHORT).show();
                 });
     }
 }

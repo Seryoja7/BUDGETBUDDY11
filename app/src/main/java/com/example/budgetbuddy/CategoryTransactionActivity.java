@@ -13,17 +13,17 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ExpenseHistoryActivity extends AppCompatActivity implements TransactionAdapter.OnTransactionDeleteListener {
+public class CategoryTransactionActivity extends AppCompatActivity implements TransactionAdapter.OnTransactionDeleteListener {
     private RecyclerView recyclerView;
     private TransactionAdapter adapter;
     private List<Transaction> transactions;
     private FirebaseFirestore db;
-    private String type;
+    private String category;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_expense_history);
+        setContentView(R.layout.activity_history);
 
         recyclerView = findViewById(R.id.recyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -33,10 +33,10 @@ public class ExpenseHistoryActivity extends AppCompatActivity implements Transac
         recyclerView.setAdapter(adapter);
 
         db = FirebaseFirestore.getInstance();
-        type = getIntent().getStringExtra("type");
+        category = getIntent().getStringExtra("category");
 
-        if (type == null || type.isEmpty()) {
-            Toast.makeText(this, "Type not specified", Toast.LENGTH_SHORT).show();
+        if (category == null || category.isEmpty()) {
+            Toast.makeText(this, "Category not specified", Toast.LENGTH_SHORT).show();
             finish();
             return;
         }
@@ -52,10 +52,9 @@ public class ExpenseHistoryActivity extends AppCompatActivity implements Transac
 
     private void loadTransactions() {
         String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
-
         db.collection("transactions")
                 .whereEqualTo("userId", userId)
-                .whereEqualTo("type", type)
+                .whereEqualTo("category", category)
                 .get()
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {

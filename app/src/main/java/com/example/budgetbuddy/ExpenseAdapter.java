@@ -34,7 +34,6 @@ public class ExpenseAdapter extends RecyclerView.Adapter<ExpenseAdapter.ExpenseV
         Expense expense = expenseList.get(position);
         holder.tvTitle.setText(expense.getTitle());
         holder.tvPrice.setText(String.format("%.2f AMD", expense.getAmount()));
-        holder.tvCategory.setText(expense.getCategory());
         holder.tvNotes.setText(expense.getNote());
         holder.tvDate.setText(expense.getDate());
     }
@@ -45,14 +44,13 @@ public class ExpenseAdapter extends RecyclerView.Adapter<ExpenseAdapter.ExpenseV
     }
 
     public static class ExpenseViewHolder extends RecyclerView.ViewHolder {
-        TextView tvTitle, tvPrice, tvCategory, tvNotes, tvDate;
+        TextView tvTitle, tvPrice, tvNotes, tvDate;
         ImageButton btnDelete;
 
         public ExpenseViewHolder(@NonNull View itemView, OnDeleteClickListener listener) {
             super(itemView);
             tvTitle = itemView.findViewById(R.id.tvTitle);
             tvPrice = itemView.findViewById(R.id.tvPrice);
-            tvCategory = itemView.findViewById(R.id.tvCategory);
             tvNotes = itemView.findViewById(R.id.tvNotes);
             tvDate = itemView.findViewById(R.id.tvDate);
             btnDelete = itemView.findViewById(R.id.btnDelete);

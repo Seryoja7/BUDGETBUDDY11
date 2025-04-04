@@ -44,4 +44,7 @@
     <item name="tvExpenseSum" type="id" />
     <item name="tvBudgetSum" type="id" />
     <item name="rootLayout" type="id" />
+    <item name="toolbar" type="id" />
+    <item name="tvAmount" type="id" />
+    <item name="tvNote" type="id" />
 </resources>

@@ -46,15 +46,13 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
         mAuth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
-
         initializeViews();
         setupButtonPositions();
         setTouchListeners();
         loadCategorySums();
-        addSummaryLayout(); // Add the Income, Expense, and Budget summaries
+        addSummaryLayout();
         btnOptions.setOnClickListener(v -> showOptionsDialog());
     }
 
@@ -62,7 +60,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         loadCategorySums();
-        updateSummaryViews(); // Update the summary views when the activity resumes
+        updateSummaryViews();
     }
 
     private void loadCategorySums() {
@@ -145,6 +143,12 @@ public class MainActivity extends AppCompatActivity {
         tvEntertainmentSum = findViewById(R.id.tvEntertainmentSum);
         tvEatOutsideSum = findViewById(R.id.tvEatOutsideSum);
         tvOtherSum = findViewById(R.id.tvOtherSum);
+        btnTransport.setOnClickListener(v -> showCategoryTransactions("Transport"));
+        btnFood.setOnClickListener(v -> showCategoryTransactions("Food"));
+        btnPurchases.setOnClickListener(v -> showCategoryTransactions("Purchases"));
+        btnEntertainment.setOnClickListener(v -> showCategoryTransactions("Entertainment"));
+        btnEatOutside.setOnClickListener(v -> showCategoryTransactions("Eat Outside"));
+        btnOther.setOnClickListener(v -> showCategoryTransactions("Other"));
     }
 
     private void setupButtonPositions() {
@@ -358,8 +362,6 @@ public class MainActivity extends AppCompatActivity {
 
     private void addSummaryLayout() {
         RelativeLayout rootLayout = findViewById(android.R.id.content).getRootView().findViewById(R.id.rootLayout);
-
-        // Create a horizontal LinearLayout for the summary
         summaryLayout = new LinearLayout(this);
         summaryLayout.setId(View.generateViewId());
         summaryLayout.setOrientation(LinearLayout.HORIZONTAL);
@@ -370,22 +372,14 @@ public class MainActivity extends AppCompatActivity {
         );
         layoutParams.addRule(RelativeLayout.ALIGN_PARENT_TOP);
         layoutParams.addRule(RelativeLayout.ALIGN_PARENT_END);
-        layoutParams.setMargins(0, 16, 16, 0); // Adjust margins as needed
+        layoutParams.setMargins(0, 16, 16, 0);
         summaryLayout.setLayoutParams(layoutParams);
-
-        // Add Income section
         LinearLayout incomeLayout = createSummarySection("Income", "0.00 AMD");
         summaryLayout.addView(incomeLayout);
-
-        // Add Expense section
         LinearLayout expenseLayout = createSummarySection("Expense", "0.00 AMD");
         summaryLayout.addView(expenseLayout);
-
-        // Add Budget section
         LinearLayout budgetLayout = createSummarySection("Budget", "0.00 AMD");
         summaryLayout.addView(budgetLayout);
-
-        // Add the summary layout to the root layout
         rootLayout.addView(summaryLayout);
     }
 
@@ -397,21 +391,18 @@ public class MainActivity extends AppCompatActivity {
                 LinearLayout.LayoutParams.WRAP_CONTENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT
         );
-        params.setMargins(16, 0, 16, 0); // Spacing between sections
+        params.setMargins(16, 0, 16, 0);
         verticalLayout.setLayoutParams(params);
-
         TextView labelView = new TextView(this);
         labelView.setText(label);
         labelView.setTextColor(getResources().getColor(android.R.color.black));
         labelView.setTextSize(14);
         verticalLayout.addView(labelView);
-
         TextView valueView = new TextView(this);
         valueView.setText(value);
         valueView.setTextColor(getResources().getColor(android.R.color.black));
         valueView.setTextSize(14);
         verticalLayout.addView(valueView);
-
         if (label.equals("Income")) {
             tvTotalIncome = valueView;
         } else if (label.equals("Expense")) {
@@ -419,14 +410,11 @@ public class MainActivity extends AppCompatActivity {
         } else if (label.equals("Budget")) {
             tvBudget = valueView;
         }
-
         return verticalLayout;
     }
 
     private void updateSummaryViews() {
         String userId = mAuth.getCurrentUser().getUid();
-
-        // Calculate Total Income
         db.collection("transactions")
                 .whereEqualTo("userId", userId)
                 .whereEqualTo("type", "Income")
@@ -438,8 +426,6 @@ public class MainActivity extends AppCompatActivity {
                             totalIncome += document.getDouble("amount");
                         }
                         tvTotalIncome.setText(String.format(Locale.getDefault(), "%.2f AMD", totalIncome));
-
-                        // Calculate Total Expense
                         double finalTotalIncome = totalIncome;
                         db.collection("transactions")
                                 .whereEqualTo("userId", userId)
@@ -452,13 +438,17 @@ public class MainActivity extends AppCompatActivity {
                                             totalExpense += document.getDouble("amount");
                                         }
                                         tvTotalExpense.setText(String.format(Locale.getDefault(), "%.2f AMD", totalExpense));
-
-                                        // Calculate Budget
                                         double budget = finalTotalIncome - totalExpense;
                                         tvBudget.setText(String.format(Locale.getDefault(), "%.2f AMD", budget));
                                     }
                                 });
                     }
                 });
+    }
+
+    private void showCategoryTransactions(String category) {
+        Intent intent = new Intent(this, CategoryTransactionActivity.class);
+        intent.putExtra("category", category);
+        startActivity(intent);
     }
 }
