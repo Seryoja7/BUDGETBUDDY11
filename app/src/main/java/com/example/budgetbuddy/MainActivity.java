@@ -20,6 +20,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.Timestamp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -54,6 +55,7 @@ public class MainActivity extends AppCompatActivity {
         loadCategorySums();
         addSummaryLayout();
         btnOptions.setOnClickListener(v -> showOptionsDialog());
+        setupBottomNavigation();
     }
 
     @Override
@@ -110,11 +112,10 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        int id = item.getItemId();
-        if (id == R.id.action_view_expense) {
+        if (item.getItemId() == R.id.action_view_expense) {
             startViewActivity("Expense");
             return true;
-        } else if (id == R.id.action_view_income) {
+        } else if (item.getItemId() == R.id.action_view_income) {
             startViewActivity("Income");
             return true;
         }
@@ -122,9 +123,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void startViewActivity(String type) {
-        Intent intent = new Intent(this, ExpenseHistoryActivity.class);
-        intent.putExtra("type", type);
-        startActivity(intent);
+        startActivity(new Intent(this, ExpenseHistoryActivity.class).putExtra("type", type));
     }
 
     private void initializeViews() {
@@ -182,31 +181,21 @@ public class MainActivity extends AppCompatActivity {
                     return true;
                 case MotionEvent.ACTION_MOVE:
                     isDragged = true;
-                    view.animate()
-                            .x(event.getRawX() + dX)
-                            .y(event.getRawY() + dY)
-                            .setDuration(0)
-                            .start();
+                    view.animate().x(event.getRawX() + dX).y(event.getRawY() + dY).setDuration(0).start();
                     return true;
                 case MotionEvent.ACTION_UP:
                     if (isDragged) {
                         ImageButton targetCategory = findNearestCategory(view);
-                        if (targetCategory != null) {
-                            showInputDialog(targetCategory, view.getId() == R.id.btnExpense);
-                        }
+                        if (targetCategory != null) showInputDialog(targetCategory, view.getId() == R.id.btnExpense);
                         resetButtonPosition(view);
                     }
                     return true;
-                default:
-                    return false;
+                default: return false;
             }
         }
 
         private ImageButton findNearestCategory(View draggedView) {
-            ImageButton[] categories = {
-                    btnTransport, btnFood, btnPurchases,
-                    btnEntertainment, btnEatOutside, btnOther
-            };
+            ImageButton[] categories = {btnTransport, btnFood, btnPurchases, btnEntertainment, btnEatOutside, btnOther};
             Point draggedCenter = getViewCenter(draggedView);
             ImageButton nearestCategory = null;
             float minDistance = Float.MAX_VALUE;
@@ -224,10 +213,7 @@ public class MainActivity extends AppCompatActivity {
         private Point getViewCenter(View view) {
             int[] location = new int[2];
             view.getLocationOnScreen(location);
-            return new Point(
-                    location[0] + view.getWidth() / 2,
-                    location[1] + view.getHeight() / 2
-            );
+            return new Point(location[0] + view.getWidth() / 2, location[1] + view.getHeight() / 2);
         }
 
         private float calculateDistance(Point p1, Point p2) {
@@ -237,12 +223,7 @@ public class MainActivity extends AppCompatActivity {
         private void resetButtonPosition(View view) {
             float targetX = view.getId() == R.id.btnExpense ? initialXExpense : initialXIncome;
             float targetY = view.getId() == R.id.btnExpense ? initialYExpense : initialYIncome;
-            view.animate()
-                    .x(targetX)
-                    .y(targetY)
-                    .setDuration(300)
-                    .setInterpolator(new AccelerateDecelerateInterpolator())
-                    .start();
+            view.animate().x(targetX).y(targetY).setDuration(300).setInterpolator(new AccelerateDecelerateInterpolator()).start();
         }
     }
 
@@ -256,63 +237,44 @@ public class MainActivity extends AppCompatActivity {
                 .setTitle("Add " + (isExpense ? "Expense" : "Income") + " to " + category.getContentDescription())
                 .setPositiveButton("Save", (dialog, which) -> {
                     String amount = etAmount.getText().toString();
-                    String note = etNote.getText().toString();
-                    if (!amount.isEmpty()) {
-                        saveToFirestore(category.getContentDescription().toString(), amount, note, isExpense);
-                    } else {
-                        Toast.makeText(this, "Please enter an amount", Toast.LENGTH_SHORT).show();
-                    }
+                    if (!amount.isEmpty()) saveToFirestore(category.getContentDescription().toString(), amount, etNote.getText().toString(), isExpense);
+                    else Toast.makeText(this, "Please enter an amount", Toast.LENGTH_SHORT).show();
                 })
                 .setNegativeButton("Cancel", null)
                 .show();
     }
 
     private void saveToFirestore(String category, String amount, String note, boolean isExpense) {
-        String type = isExpense ? "Expense" : "Income";
-        String currentDate = new SimpleDateFormat("dd-MM-yyyy", Locale.getDefault()).format(new Date());
         Map<String, Object> transaction = new HashMap<>();
-        transaction.put("type", type);
+        transaction.put("type", isExpense ? "Expense" : "Income");
         transaction.put("title", category);
         transaction.put("amount", Double.parseDouble(amount));
         transaction.put("category", category);
         transaction.put("note", note.isEmpty() ? "No notes" : note);
-        transaction.put("date", currentDate);
+        transaction.put("date", new SimpleDateFormat("dd-MM-yyyy", Locale.getDefault()).format(new Date()));
         transaction.put("timestamp", Timestamp.now());
         transaction.put("userId", mAuth.getCurrentUser().getUid());
         transaction.put("currency", "AMD");
-        db.collection("transactions")
-                .add(transaction)
+
+        db.collection("transactions").add(transaction)
                 .addOnSuccessListener(documentReference -> {
-                    Toast.makeText(this, type + " saved!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, transaction.get("type") + " saved!", Toast.LENGTH_SHORT).show();
                     loadCategorySums();
                 })
-                .addOnFailureListener(e -> {
-                    Toast.makeText(this, "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                });
+                .addOnFailureListener(e -> Toast.makeText(this, "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show());
     }
 
     private void setupNumberPad(View dialogView, EditText etAmount) {
-        int[] numberButtons = {
-                R.id.btn0, R.id.btn1, R.id.btn2, R.id.btn3, R.id.btn4,
-                R.id.btn5, R.id.btn6, R.id.btn7, R.id.btn8, R.id.btn9
-        };
-        for (int buttonId : numberButtons) {
-            dialogView.findViewById(buttonId).setOnClickListener(v -> {
-                Button btn = (Button) v;
-                etAmount.append(btn.getText());
-            });
+        for (int i = 0; i <= 9; i++) {
+            int resId = getResources().getIdentifier("btn" + i, "id", getPackageName());
+            dialogView.findViewById(resId).setOnClickListener(v -> etAmount.append(((Button)v).getText()));
         }
         dialogView.findViewById(R.id.btnDot).setOnClickListener(v -> {
-            String current = etAmount.getText().toString();
-            if (!current.contains(".")) {
-                etAmount.append(".");
-            }
+            if (!etAmount.getText().toString().contains(".")) etAmount.append(".");
         });
         dialogView.findViewById(R.id.btnBackspace).setOnClickListener(v -> {
             String current = etAmount.getText().toString();
-            if (current.length() > 0) {
-                etAmount.setText(current.substring(0, current.length() - 1));
-            }
+            if (!current.isEmpty()) etAmount.setText(current.substring(0, current.length() - 1));
         });
     }
 
@@ -320,35 +282,22 @@ public class MainActivity extends AppCompatActivity {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         LinearLayout layout = new LinearLayout(this);
         layout.setOrientation(LinearLayout.VERTICAL);
-        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.WRAP_CONTENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT
-        );
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
         params.setMargins(16, 8, 16, 8);
-        Button btnViewExpense = new Button(this);
-        btnViewExpense.setText("View Expenses");
-        btnViewExpense.setOnClickListener(v -> {
-            startViewActivity("Expense");
-            ((AlertDialog) ((View) v.getParent()).getTag()).dismiss();
-        });
-        Button btnViewIncome = new Button(this);
-        btnViewIncome.setText("View Incomes");
-        btnViewIncome.setOnClickListener(v -> {
-            startViewActivity("Income");
-            ((AlertDialog) ((View) v.getParent()).getTag()).dismiss();
-        });
-        Button btnLogout = new Button(this);
-        btnLogout.setText("Logout");
-        btnLogout.setOnClickListener(v -> {
+
+        Button btnViewExpense = createDialogButton("View Expenses", v -> startViewActivity("Expense"));
+        Button btnViewIncome = createDialogButton("View Incomes", v -> startViewActivity("Income"));
+        Button btnLogout = createDialogButton("Logout", v -> {
             mAuth.signOut();
             startActivity(new Intent(MainActivity.this, Login.class));
             finishAffinity();
         });
+
         layout.addView(btnViewExpense, params);
         layout.addView(btnViewIncome, params);
         layout.addView(btnLogout, params);
-        builder.setView(layout);
-        AlertDialog dialog = builder.create();
+
+        AlertDialog dialog = builder.setView(layout).create();
         if (dialog.getWindow() != null) {
             dialog.getWindow().setGravity(Gravity.TOP | Gravity.START);
             WindowManager.LayoutParams layoutParams = dialog.getWindow().getAttributes();
@@ -360,65 +309,64 @@ public class MainActivity extends AppCompatActivity {
         dialog.show();
     }
 
+    private Button createDialogButton(String text, View.OnClickListener listener) {
+        Button button = new Button(this);
+        button.setText(text);
+        button.setOnClickListener(listener);
+        return button;
+    }
+
     private void addSummaryLayout() {
-        RelativeLayout rootLayout = findViewById(android.R.id.content).getRootView().findViewById(R.id.rootLayout);
+        RelativeLayout rootLayout = findViewById(R.id.rootLayout);
         summaryLayout = new LinearLayout(this);
         summaryLayout.setId(View.generateViewId());
         summaryLayout.setOrientation(LinearLayout.HORIZONTAL);
         summaryLayout.setGravity(Gravity.CENTER_VERTICAL);
-        RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(
+
+        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(
                 RelativeLayout.LayoutParams.WRAP_CONTENT,
                 RelativeLayout.LayoutParams.WRAP_CONTENT
         );
-        layoutParams.addRule(RelativeLayout.ALIGN_PARENT_TOP);
-        layoutParams.addRule(RelativeLayout.ALIGN_PARENT_END);
-        layoutParams.setMargins(0, 16, 16, 0);
-        summaryLayout.setLayoutParams(layoutParams);
-        LinearLayout incomeLayout = createSummarySection("Income", "0.00 AMD");
-        summaryLayout.addView(incomeLayout);
-        LinearLayout expenseLayout = createSummarySection("Expense", "0.00 AMD");
-        summaryLayout.addView(expenseLayout);
-        LinearLayout budgetLayout = createSummarySection("Budget", "0.00 AMD");
-        summaryLayout.addView(budgetLayout);
-        rootLayout.addView(summaryLayout);
+        params.addRule(RelativeLayout.ALIGN_PARENT_TOP);
+        params.addRule(RelativeLayout.ALIGN_PARENT_END);
+        params.setMargins(0, 16, 16, 0);
+
+        summaryLayout.addView(createSummarySection("Income", "0.00 AMD"));
+        summaryLayout.addView(createSummarySection("Expense", "0.00 AMD"));
+        summaryLayout.addView(createSummarySection("Budget", "0.00 AMD"));
+
+        rootLayout.addView(summaryLayout, params);
     }
 
     private LinearLayout createSummarySection(String label, String value) {
-        LinearLayout verticalLayout = new LinearLayout(this);
-        verticalLayout.setOrientation(LinearLayout.VERTICAL);
-        verticalLayout.setGravity(Gravity.CENTER_HORIZONTAL);
-        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.WRAP_CONTENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT
-        );
-        params.setMargins(16, 0, 16, 0);
-        verticalLayout.setLayoutParams(params);
+        LinearLayout layout = new LinearLayout(this);
+        layout.setOrientation(LinearLayout.VERTICAL);
+        layout.setGravity(Gravity.CENTER_HORIZONTAL);
+        layout.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT));
+        ((LinearLayout.LayoutParams)layout.getLayoutParams()).setMargins(16, 0, 16, 0);
+
         TextView labelView = new TextView(this);
         labelView.setText(label);
         labelView.setTextColor(getResources().getColor(android.R.color.black));
         labelView.setTextSize(14);
-        verticalLayout.addView(labelView);
+
         TextView valueView = new TextView(this);
         valueView.setText(value);
         valueView.setTextColor(getResources().getColor(android.R.color.black));
         valueView.setTextSize(14);
-        verticalLayout.addView(valueView);
-        if (label.equals("Income")) {
-            tvTotalIncome = valueView;
-        } else if (label.equals("Expense")) {
-            tvTotalExpense = valueView;
-        } else if (label.equals("Budget")) {
-            tvBudget = valueView;
-        }
-        return verticalLayout;
+
+        if (label.equals("Income")) tvTotalIncome = valueView;
+        else if (label.equals("Expense")) tvTotalExpense = valueView;
+        else if (label.equals("Budget")) tvBudget = valueView;
+
+        layout.addView(labelView);
+        layout.addView(valueView);
+        return layout;
     }
 
     private void updateSummaryViews() {
         String userId = mAuth.getCurrentUser().getUid();
-        db.collection("transactions")
-                .whereEqualTo("userId", userId)
-                .whereEqualTo("type", "Income")
-                .get()
+        db.collection("transactions").whereEqualTo("userId", userId).whereEqualTo("type", "Income").get()
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
                         double totalIncome = 0.0;
@@ -427,10 +375,7 @@ public class MainActivity extends AppCompatActivity {
                         }
                         tvTotalIncome.setText(String.format(Locale.getDefault(), "%.2f AMD", totalIncome));
                         double finalTotalIncome = totalIncome;
-                        db.collection("transactions")
-                                .whereEqualTo("userId", userId)
-                                .whereEqualTo("type", "Expense")
-                                .get()
+                        db.collection("transactions").whereEqualTo("userId", userId).whereEqualTo("type", "Expense").get()
                                 .addOnCompleteListener(task2 -> {
                                     if (task2.isSuccessful()) {
                                         double totalExpense = 0.0;
@@ -438,8 +383,7 @@ public class MainActivity extends AppCompatActivity {
                                             totalExpense += document.getDouble("amount");
                                         }
                                         tvTotalExpense.setText(String.format(Locale.getDefault(), "%.2f AMD", totalExpense));
-                                        double budget = finalTotalIncome - totalExpense;
-                                        tvBudget.setText(String.format(Locale.getDefault(), "%.2f AMD", budget));
+                                        tvBudget.setText(String.format(Locale.getDefault(), "%.2f AMD", finalTotalIncome - totalExpense));
                                     }
                                 });
                     }
@@ -447,8 +391,32 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void showCategoryTransactions(String category) {
-        Intent intent = new Intent(this, CategoryTransactionActivity.class);
-        intent.putExtra("category", category);
-        startActivity(intent);
+        startActivity(new Intent(this, CategoryTransactionActivity.class).putExtra("category", category));
+    }
+
+    private void setupBottomNavigation() {
+        BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_navigation);
+        bottomNavigationView.setOnNavigationItemSelectedListener(item -> {
+            int itemId = item.getItemId();
+
+            if (itemId == R.id.nav_expense) {
+                return true;
+            } else if (itemId == R.id.nav_income) {
+                startActivity(new Intent(MainActivity.this, MainActivity2.class));
+                overridePendingTransition(0, 0);
+                return true;
+            } else if (itemId == R.id.nav_home) {
+                startActivity(new Intent(MainActivity.this, HomeActivity.class));
+                overridePendingTransition(0, 0);
+                return true;
+            } else if (itemId == R.id.nav_settings) {
+                startActivity(new Intent(MainActivity.this, SettingsActivity.class));
+                overridePendingTransition(0, 0);
+                return true;
+            }
+            return false;
+        });
+
+        bottomNavigationView.setSelectedItemId(R.id.nav_expense);
     }
 }

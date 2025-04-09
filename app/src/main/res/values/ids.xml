@@ -47,4 +47,8 @@
     <item name="toolbar" type="id" />
     <item name="tvAmount" type="id" />
     <item name="tvNote" type="id" />
+    <item name="btnExpenseNav" type="id" />
+    <item name="btnIncomeNav" type="id" />
+    <item name="btnSettingsNav" type="id" />
+    <item name="bottomNavigation" type="id" />
 </resources>

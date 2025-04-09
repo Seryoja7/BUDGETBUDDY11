@@ -6,6 +6,7 @@
     android:padding="16dp"
     android:clipChildren="false">
 
+    <!-- Options Button -->
     <ImageButton
         android:id="@+id/btnOptions"
         android:layout_width="48dp"
@@ -20,6 +21,7 @@
         android:padding="12dp"
         app:tint="@android:color/black" />
 
+    <!-- Categories Layout -->
     <LinearLayout
         android:id="@+id/categoriesLayout"
         android:layout_width="match_parent"
@@ -31,6 +33,7 @@
         android:weightSum="4"
         android:clipChildren="false">
 
+        <!-- Transport Category -->
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -64,6 +67,7 @@
                 android:visibility="gone" />
         </LinearLayout>
 
+        <!-- Food Category -->
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -97,6 +101,7 @@
                 android:visibility="gone" />
         </LinearLayout>
 
+        <!-- Purchases Category -->
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -130,6 +135,7 @@
                 android:visibility="gone" />
         </LinearLayout>
 
+        <!-- Entertainment Category -->
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -164,6 +170,7 @@
         </LinearLayout>
     </LinearLayout>
 
+    <!-- Eat Outside and Other Categories -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -174,6 +181,7 @@
         android:weightSum="4"
         android:clipChildren="false">
 
+        <!-- Eat Outside Category -->
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -207,6 +215,7 @@
                 android:visibility="gone" />
         </LinearLayout>
 
+        <!-- Other Category -->
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -241,6 +250,7 @@
         </LinearLayout>
     </LinearLayout>
 
+    <!-- Expense and Income Buttons -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -251,6 +261,7 @@
         android:weightSum="2"
         android:clipChildren="false">
 
+        <!-- Expense Button -->
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -276,6 +287,7 @@
                 app:tint="@android:color/white" />
         </LinearLayout>
 
+        <!-- Income Button -->
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -301,4 +313,15 @@
                 app:tint="@android:color/white" />
         </LinearLayout>
     </LinearLayout>
+
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/bottom_navigation"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:background="?android:attr/windowBackground"
+        app:menu="@menu/bottom_nav_menu"
+        app:itemIconTint="@drawable/nav_item_color_state"
+        app:itemTextColor="@drawable/nav_item_color_state"
+        app:labelVisibilityMode="labeled"/>
 </RelativeLayout>
