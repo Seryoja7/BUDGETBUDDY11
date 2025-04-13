@@ -98,12 +98,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void updateSumView(TextView textView, double amount) {
-        if (amount > 0) {
-            textView.setText(String.format(Locale.getDefault(), "%.2f AMD", amount));
-            textView.setVisibility(View.VISIBLE);
-        } else {
-            textView.setVisibility(View.GONE);
-        }
+        textView.setText(String.format(Locale.getDefault(), "%.2f AMD", amount));
     }
 
     @Override

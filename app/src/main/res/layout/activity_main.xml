@@ -61,8 +61,7 @@
                 android:layout_height="wrap_content"
                 android:textSize="14sp"
                 android:textColor="@android:color/black"
-                android:layout_marginTop="4dp"
-                android:visibility="gone" />
+                android:layout_marginTop="4dp" />
         </LinearLayout>
 
         <LinearLayout
@@ -94,8 +93,7 @@
                 android:layout_height="wrap_content"
                 android:textSize="14sp"
                 android:textColor="@android:color/black"
-                android:layout_marginTop="4dp"
-                android:visibility="gone" />
+                android:layout_marginTop="4dp" />
         </LinearLayout>
 
         <LinearLayout
@@ -127,8 +125,7 @@
                 android:layout_height="wrap_content"
                 android:textSize="14sp"
                 android:textColor="@android:color/black"
-                android:layout_marginTop="4dp"
-                android:visibility="gone" />
+                android:layout_marginTop="4dp" />
         </LinearLayout>
 
         <LinearLayout
@@ -160,8 +157,7 @@
                 android:layout_height="wrap_content"
                 android:textSize="14sp"
                 android:textColor="@android:color/black"
-                android:layout_marginTop="4dp"
-                android:visibility="gone" />
+                android:layout_marginTop="4dp" />
         </LinearLayout>
     </LinearLayout>
 
@@ -204,8 +200,7 @@
                 android:layout_height="wrap_content"
                 android:textSize="14sp"
                 android:textColor="@android:color/black"
-                android:layout_marginTop="4dp"
-                android:visibility="gone" />
+                android:layout_marginTop="4dp" />
         </LinearLayout>
 
         <LinearLayout
@@ -237,8 +232,7 @@
                 android:layout_height="wrap_content"
                 android:textSize="14sp"
                 android:textColor="@android:color/black"
-                android:layout_marginTop="4dp"
-                android:visibility="gone" />
+                android:layout_marginTop="4dp" />
         </LinearLayout>
     </LinearLayout>
 
