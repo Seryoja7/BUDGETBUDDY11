@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/rootLayout"
@@ -6,7 +7,6 @@
     android:padding="16dp"
     android:clipChildren="false">
 
-    <!-- Options Button -->
     <ImageButton
         android:id="@+id/btnOptions"
         android:layout_width="48dp"
@@ -21,7 +21,6 @@
         android:padding="12dp"
         app:tint="@android:color/black" />
 
-    <!-- Categories Layout -->
     <LinearLayout
         android:id="@+id/categoriesLayout"
         android:layout_width="match_parent"
@@ -33,7 +32,6 @@
         android:weightSum="4"
         android:clipChildren="false">
 
-        <!-- Transport Category -->
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -67,7 +65,6 @@
                 android:visibility="gone" />
         </LinearLayout>
 
-        <!-- Food Category -->
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -101,7 +98,6 @@
                 android:visibility="gone" />
         </LinearLayout>
 
-        <!-- Purchases Category -->
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -135,7 +131,6 @@
                 android:visibility="gone" />
         </LinearLayout>
 
-        <!-- Entertainment Category -->
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -170,7 +165,6 @@
         </LinearLayout>
     </LinearLayout>
 
-    <!-- Eat Outside and Other Categories -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -181,7 +175,6 @@
         android:weightSum="4"
         android:clipChildren="false">
 
-        <!-- Eat Outside Category -->
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -215,7 +208,6 @@
                 android:visibility="gone" />
         </LinearLayout>
 
-        <!-- Other Category -->
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -250,7 +242,6 @@
         </LinearLayout>
     </LinearLayout>
 
-    <!-- Expense and Income Buttons -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -258,14 +249,11 @@
         android:layout_marginTop="20dp"
         android:orientation="horizontal"
         android:gravity="center"
-        android:weightSum="2"
         android:clipChildren="false">
 
-        <!-- Expense Button -->
         <LinearLayout
-            android:layout_width="0dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
             android:orientation="vertical"
             android:gravity="center"
             android:clipChildren="false">
@@ -278,32 +266,6 @@
                 android:layout_marginBottom="8dp" />
             <ImageButton
                 android:id="@+id/btnExpense"
-                android:layout_width="80dp"
-                android:layout_height="80dp"
-                android:src="@drawable/ic_dollar"
-                android:background="@drawable/circle_button_yellow"
-                android:scaleType="centerInside"
-                android:padding="20dp"
-                app:tint="@android:color/white" />
-        </LinearLayout>
-
-        <!-- Income Button -->
-        <LinearLayout
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:orientation="vertical"
-            android:gravity="center"
-            android:clipChildren="false">
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Income"
-                android:textSize="16sp"
-                android:textColor="@android:color/black"
-                android:layout_marginBottom="8dp" />
-            <ImageButton
-                android:id="@+id/btnIncome"
                 android:layout_width="80dp"
                 android:layout_height="80dp"
                 android:src="@drawable/ic_dollar"

@@ -32,16 +32,18 @@ import java.util.Locale;
 import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
-    private ImageButton btnExpense, btnIncome;
+    private ImageButton btnExpense;
     private ImageButton btnTransport, btnFood, btnPurchases, btnEntertainment, btnEatOutside, btnOther;
     private ImageButton btnOptions;
     private TextView tvTransportSum, tvFoodSum, tvPurchasesSum, tvEntertainmentSum, tvEatOutsideSum, tvOtherSum;
-    private float initialXExpense, initialYExpense, initialXIncome, initialYIncome;
+    private float initialXExpense, initialYExpense;
     private static final float SNAP_THRESHOLD = 200f;
     private FirebaseFirestore db;
     private FirebaseAuth mAuth;
     private TextView tvTotalIncome, tvTotalExpense, tvBudget;
     private LinearLayout summaryLayout;
+    private double firstOperand = 0;
+    private String currentOperation = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -128,7 +130,6 @@ public class MainActivity extends AppCompatActivity {
 
     private void initializeViews() {
         btnExpense = findViewById(R.id.btnExpense);
-        btnIncome = findViewById(R.id.btnIncome);
         btnTransport = findViewById(R.id.btnTransport);
         btnFood = findViewById(R.id.btnFood);
         btnPurchases = findViewById(R.id.btnPurchases);
@@ -155,15 +156,10 @@ public class MainActivity extends AppCompatActivity {
             initialXExpense = btnExpense.getX();
             initialYExpense = btnExpense.getY();
         });
-        btnIncome.post(() -> {
-            initialXIncome = btnIncome.getX();
-            initialYIncome = btnIncome.getY();
-        });
     }
 
     private void setTouchListeners() {
         btnExpense.setOnTouchListener(new DraggableButtonListener());
-        btnIncome.setOnTouchListener(new DraggableButtonListener());
     }
 
     private class DraggableButtonListener implements View.OnTouchListener {
@@ -186,11 +182,12 @@ public class MainActivity extends AppCompatActivity {
                 case MotionEvent.ACTION_UP:
                     if (isDragged) {
                         ImageButton targetCategory = findNearestCategory(view);
-                        if (targetCategory != null) showInputDialog(targetCategory, view.getId() == R.id.btnExpense);
+                        if (targetCategory != null) showInputDialog(targetCategory, true);
                         resetButtonPosition(view);
                     }
                     return true;
-                default: return false;
+                default:
+                    return false;
             }
         }
 
@@ -221,8 +218,8 @@ public class MainActivity extends AppCompatActivity {
         }
 
         private void resetButtonPosition(View view) {
-            float targetX = view.getId() == R.id.btnExpense ? initialXExpense : initialXIncome;
-            float targetY = view.getId() == R.id.btnExpense ? initialYExpense : initialYIncome;
+            float targetX = initialXExpense;
+            float targetY = initialYExpense;
             view.animate().x(targetX).y(targetY).setDuration(300).setInterpolator(new AccelerateDecelerateInterpolator()).start();
         }
     }
@@ -255,7 +252,6 @@ public class MainActivity extends AppCompatActivity {
         transaction.put("timestamp", Timestamp.now());
         transaction.put("userId", mAuth.getCurrentUser().getUid());
         transaction.put("currency", "AMD");
-
         db.collection("transactions").add(transaction)
                 .addOnSuccessListener(documentReference -> {
                     Toast.makeText(this, transaction.get("type") + " saved!", Toast.LENGTH_SHORT).show();
@@ -267,7 +263,7 @@ public class MainActivity extends AppCompatActivity {
     private void setupNumberPad(View dialogView, EditText etAmount) {
         for (int i = 0; i <= 9; i++) {
             int resId = getResources().getIdentifier("btn" + i, "id", getPackageName());
-            dialogView.findViewById(resId).setOnClickListener(v -> etAmount.append(((Button)v).getText()));
+            dialogView.findViewById(resId).setOnClickListener(v -> etAmount.append(((Button) v).getText()));
         }
         dialogView.findViewById(R.id.btnDot).setOnClickListener(v -> {
             if (!etAmount.getText().toString().contains(".")) etAmount.append(".");
@@ -276,6 +272,68 @@ public class MainActivity extends AppCompatActivity {
             String current = etAmount.getText().toString();
             if (!current.isEmpty()) etAmount.setText(current.substring(0, current.length() - 1));
         });
+        dialogView.findViewById(R.id.btnAdd).setOnClickListener(v -> {
+            saveCurrentOperand(etAmount, "+");
+            currentOperation = "+";
+        });
+        dialogView.findViewById(R.id.btnSubtract).setOnClickListener(v -> {
+            saveCurrentOperand(etAmount, "-");
+            currentOperation = "-";
+        });
+        dialogView.findViewById(R.id.btnMultiply).setOnClickListener(v -> {
+            saveCurrentOperand(etAmount, "*");
+            currentOperation = "*";
+        });
+        dialogView.findViewById(R.id.btnDivide).setOnClickListener(v -> {
+            saveCurrentOperand(etAmount, "/");
+            currentOperation = "/";
+        });
+        dialogView.findViewById(R.id.btnEquals).setOnClickListener(v -> {
+            if (!currentOperation.isEmpty()) {
+                String secondOperandText = etAmount.getText().toString();
+                if (!secondOperandText.isEmpty()) {
+                    double secondOperand = Double.parseDouble(secondOperandText);
+                    double result = calculateResult(firstOperand, secondOperand, currentOperation);
+                    etAmount.setText(String.valueOf(result));
+                    firstOperand = result;
+                    currentOperation = "";
+                } else {
+                    Toast.makeText(this, "Please enter a second operand", Toast.LENGTH_SHORT).show();
+                }
+            } else {
+                Toast.makeText(this, "No operation selected", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void saveCurrentOperand(EditText etAmount, String operation) {
+        String currentText = etAmount.getText().toString();
+        if (!currentText.isEmpty()) {
+            firstOperand = Double.parseDouble(currentText);
+            etAmount.setText("");
+        } else {
+            Toast.makeText(this, "Please enter a first operand", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private double calculateResult(double firstOperand, double secondOperand, String operation) {
+        switch (operation) {
+            case "+":
+                return firstOperand + secondOperand;
+            case "-":
+                return firstOperand - secondOperand;
+            case "*":
+                return firstOperand * secondOperand;
+            case "/":
+                if (secondOperand != 0) {
+                    return firstOperand / secondOperand;
+                } else {
+                    Toast.makeText(this, "Division by zero is not allowed", Toast.LENGTH_SHORT).show();
+                    return 0;
+                }
+            default:
+                return 0;
+        }
     }
 
     private void showOptionsDialog() {
@@ -284,7 +342,6 @@ public class MainActivity extends AppCompatActivity {
         layout.setOrientation(LinearLayout.VERTICAL);
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
         params.setMargins(16, 8, 16, 8);
-
         Button btnViewExpense = createDialogButton("View Expenses", v -> startViewActivity("Expense"));
         Button btnViewIncome = createDialogButton("View Incomes", v -> startViewActivity("Income"));
         Button btnLogout = createDialogButton("Logout", v -> {
@@ -292,11 +349,9 @@ public class MainActivity extends AppCompatActivity {
             startActivity(new Intent(MainActivity.this, Login.class));
             finishAffinity();
         });
-
         layout.addView(btnViewExpense, params);
         layout.addView(btnViewIncome, params);
         layout.addView(btnLogout, params);
-
         AlertDialog dialog = builder.setView(layout).create();
         if (dialog.getWindow() != null) {
             dialog.getWindow().setGravity(Gravity.TOP | Gravity.START);
@@ -322,7 +377,6 @@ public class MainActivity extends AppCompatActivity {
         summaryLayout.setId(View.generateViewId());
         summaryLayout.setOrientation(LinearLayout.HORIZONTAL);
         summaryLayout.setGravity(Gravity.CENTER_VERTICAL);
-
         RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(
                 RelativeLayout.LayoutParams.WRAP_CONTENT,
                 RelativeLayout.LayoutParams.WRAP_CONTENT
@@ -330,11 +384,9 @@ public class MainActivity extends AppCompatActivity {
         params.addRule(RelativeLayout.ALIGN_PARENT_TOP);
         params.addRule(RelativeLayout.ALIGN_PARENT_END);
         params.setMargins(0, 16, 16, 0);
-
         summaryLayout.addView(createSummarySection("Income", "0.00 AMD"));
         summaryLayout.addView(createSummarySection("Expense", "0.00 AMD"));
         summaryLayout.addView(createSummarySection("Budget", "0.00 AMD"));
-
         rootLayout.addView(summaryLayout, params);
     }
 
@@ -343,22 +395,18 @@ public class MainActivity extends AppCompatActivity {
         layout.setOrientation(LinearLayout.VERTICAL);
         layout.setGravity(Gravity.CENTER_HORIZONTAL);
         layout.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT));
-        ((LinearLayout.LayoutParams)layout.getLayoutParams()).setMargins(16, 0, 16, 0);
-
+        ((LinearLayout.LayoutParams) layout.getLayoutParams()).setMargins(16, 0, 16, 0);
         TextView labelView = new TextView(this);
         labelView.setText(label);
         labelView.setTextColor(getResources().getColor(android.R.color.black));
         labelView.setTextSize(14);
-
         TextView valueView = new TextView(this);
         valueView.setText(value);
         valueView.setTextColor(getResources().getColor(android.R.color.black));
         valueView.setTextSize(14);
-
         if (label.equals("Income")) tvTotalIncome = valueView;
         else if (label.equals("Expense")) tvTotalExpense = valueView;
         else if (label.equals("Budget")) tvBudget = valueView;
-
         layout.addView(labelView);
         layout.addView(valueView);
         return layout;
@@ -398,7 +446,6 @@ public class MainActivity extends AppCompatActivity {
         BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_navigation);
         bottomNavigationView.setOnNavigationItemSelectedListener(item -> {
             int itemId = item.getItemId();
-
             if (itemId == R.id.nav_expense) {
                 return true;
             } else if (itemId == R.id.nav_income) {
@@ -416,7 +463,6 @@ public class MainActivity extends AppCompatActivity {
             }
             return false;
         });
-
         bottomNavigationView.setSelectedItemId(R.id.nav_expense);
     }
 }

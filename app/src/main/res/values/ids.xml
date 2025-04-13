@@ -51,4 +51,5 @@
     <item name="btnIncomeNav" type="id" />
     <item name="btnSettingsNav" type="id" />
     <item name="bottomNavigation" type="id" />
+    <item name="btnAdd" type="id" />
 </resources>
